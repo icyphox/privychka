@@ -81,6 +81,7 @@ func main() {
 		if secretKey != key {
 			log.Printf("incorrect key: %v\n", key)
 			w.WriteHeader(401)
+			return
 		}
 		json.NewDecoder(r.Body).Decode(&h)
 		log.Printf(h.String())
@@ -88,6 +89,7 @@ func main() {
 		if err := h.WriteTSV(hFile); err != nil {
 			log.Printf("error: %v\n", err)
 			w.WriteHeader(500)
+			return
 		}
 		w.WriteHeader(204)
 	})
