@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -55,8 +56,16 @@ func (h Habit) WriteTSV(fname string) error {
 	return nil
 }
 
+func getKey(r *http.Request) string {
+	var key string
+	header := r.Header.Get("Authorization")
+	key = strings.Split(header, " ")[1]
+	return key
+}
+
 func main() {
 	hFile := *flag.String("f", "./habits.tsv", "csv file to store habit data")
+	secretKey := *flag.String("key", "secret", "auth key to be passed as bearer token")
 	flag.Parse()
 
 	if _, err := os.Stat(hFile); errors.Is(err, os.ErrNotExist) {
@@ -68,6 +77,11 @@ func main() {
 
 	http.HandleFunc("/submit", func(w http.ResponseWriter, r *http.Request) {
 		h := Habit{}
+		key := getKey(r)
+		if secretKey != key {
+			log.Printf("incorrect key: %v\n", key)
+			w.WriteHeader(401)
+		}
 		json.NewDecoder(r.Body).Decode(&h)
 		log.Printf(h.String())
 
