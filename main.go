@@ -64,12 +64,12 @@ func getKey(r *http.Request) string {
 }
 
 func main() {
-	hFile := *flag.String("f", "./habits.tsv", "csv file to store habit data")
-	secretKey := *flag.String("key", "secret", "auth key to be passed as bearer token")
+	hFile := flag.String("f", "./habits.tsv", "csv file to store habit data")
+	secretKey := flag.String("k", "", "auth key to be passed as bearer token")
 	flag.Parse()
 
-	if _, err := os.Stat(hFile); errors.Is(err, os.ErrNotExist) {
-		_, err := os.Create(hFile)
+	if _, err := os.Stat(*hFile); errors.Is(err, os.ErrNotExist) {
+		_, err := os.Create(*hFile)
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
@@ -78,7 +78,7 @@ func main() {
 	http.HandleFunc("/submit", func(w http.ResponseWriter, r *http.Request) {
 		h := Habit{}
 		key := getKey(r)
-		if secretKey != key {
+		if *secretKey != key {
 			log.Printf("incorrect key: %v\n", key)
 			w.WriteHeader(401)
 			return
@@ -86,7 +86,7 @@ func main() {
 		json.NewDecoder(r.Body).Decode(&h)
 		log.Printf(h.String())
 
-		if err := h.WriteTSV(hFile); err != nil {
+		if err := h.WriteTSV(*hFile); err != nil {
 			log.Printf("error: %v\n", err)
 			w.WriteHeader(500)
 			return
