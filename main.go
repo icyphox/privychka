@@ -6,6 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -151,19 +152,6 @@ func main() {
 	})
 
 	http.HandleFunc("/today", func(w http.ResponseWriter, r *http.Request) {
-		key, err := getKey(r)
-		if err != nil {
-			log.Printf("error: %v\n", err)
-			w.WriteHeader(401)
-			return
-		}
-
-		if *secretKey != key {
-			log.Printf("incorrect key: %v\n", key)
-			w.WriteHeader(401)
-			return
-		}
-
 		habits, err := ReadTSV(*hFile)
 		if err != nil {
 			log.Printf("error: %v\n", err)
@@ -171,7 +159,30 @@ func main() {
 			return
 		}
 		todays := getTodaysHabits(habits)
-		json.NewEncoder(w).Encode(todays)
+		t, err := template.ParseFiles("display.html")
+		if err != nil {
+			log.Printf("error: %v\n", err)
+			w.WriteHeader(500)
+			return
+		}
+		t.Execute(w, todays)
+		return
+	})
+
+	http.HandleFunc("/all", func(w http.ResponseWriter, r *http.Request) {
+		habits, err := ReadTSV(*hFile)
+		if err != nil {
+			log.Printf("error: %v\n", err)
+			w.WriteHeader(500)
+			return
+		}
+		t, err := template.ParseFiles("display.html")
+		if err != nil {
+			log.Printf("error: %v\n", err)
+			w.WriteHeader(500)
+			return
+		}
+		t.Execute(w, habits)
 		return
 	})
 

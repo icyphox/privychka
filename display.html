@@ -1,0 +1,40 @@
+<html>
+  <title>today's activities</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style type="text/css">
+  body {
+    background: #f4f4f4;
+    margin: 40px auto;
+    max-width: 650px;
+    line-height: 1.6;
+    font-size: 18px;
+    font-family: sans-serif;
+    padding: 0 10px;
+  }
+
+  td, th {
+    border: 1px solid;
+    text-align: left;
+    padding: 8px;
+  }
+  </style>
+  <main>
+    <body>
+      <table>
+        <tr>
+          <th>time</th>
+          <th>activity</th>
+          <th>notes</th>
+        </tr>
+        {{ range $_, $activity := . }}
+        <tr>
+          <td>{{ .Time.Format "02 Jan, 2006 15:04:05" }}</td>
+          <td>{{ .Activity }}</td>
+          <td><em>{{ .Notes }}</em></td>
+        </tr>
+        {{ end }}
+      </table> 
+    </body>
+  </main>
+</html>
